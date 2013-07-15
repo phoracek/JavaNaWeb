@@ -1,8 +1,11 @@
 package servlety;
 
+import databaze.UpravaZapisku;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -11,65 +14,89 @@ import javax.servlet.http.HttpServletResponse;
 import modely.Zapisek;
 
 @WebServlet(name = "Controller", urlPatterns = {"/zapisky", "/upravit", "/pridat", "/smazat", "/ulozitupravy"})
-public class Controller extends HttpServlet {
-
-    public List<Zapisek> zapisky = new ArrayList();
-
+public class Controller extends HttpServlet {   
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String adresa = request.getServletPath();
-
-        if (adresa.equals("/zapisky")) {
-            request.setAttribute("zapisky", zapisky);
-            request.getRequestDispatcher("/WEB-INF/view/zapisky.jsp").forward(request, response);
-        } else if (adresa.equals("/upravit")) {
-            int index = Integer.parseInt(request.getParameter("index"));
-            if (zapisky.get(index) != null) {
-                request.setAttribute("zapisek", zapisky.get(index));
-                request.getRequestDispatcher("/WEB-INF/view/upravit.jsp").forward(request, response);
-            } else {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            }
-        } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        UpravaZapisku upravaZapisku = new UpravaZapisku();
+        
+        if(adresa.equals("/zapisky")) {
+            try {
+                List<Zapisek> zapisky = upravaZapisku.getZapisky();
+                request.setAttribute("zapisky", zapisky);
+                request.getRequestDispatcher("/WEB-INF/view/zapisky.jsp").forward(request, response);    
+            } catch (SQLException ex) {
+                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+            }            
         }
+        else if(adresa.equals("/upravit")){
+            try {
+                int id = Integer.parseInt(request.getParameter("id"));
+                Zapisek zapisek = upravaZapisku.getZapisek(id);
+                request.setAttribute("zapisek", zapisek);
+                request.getRequestDispatcher("/WEB-INF/view/upravit.jsp").forward(request, response);
+            } catch (SQLException ex) {
+                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }        
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
         String adresa = request.getServletPath();
         request.setCharacterEncoding("UTF-8");
-
-        if (adresa.equals("/pridat")) {
+        UpravaZapisku upravaZapisku = new UpravaZapisku();
+        
+        if(adresa.equals("/pridat")) {
             String nadpis = request.getParameter("nadpis");
-            String obsah = request.getParameter("obsah");
-
-            if (!nadpis.isEmpty() && !obsah.isEmpty()) {
-                zapisky.add(new Zapisek(nadpis, obsah));
-                presmeruj(request, response, "/");
-            } else {
-                presmeruj(request, response, "/?upozorneni=True");
+            String obsah = request.getParameter("obsah");            
+            if(!nadpis.isEmpty() && !obsah.isEmpty()){
+                try {
+                    upravaZapisku.addZapisek(nadpis, obsah);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                presmeruj(request, response, "/"); 
             }
-        } else if (adresa.equals("/ulozitupravy")) {
-            int index = Integer.parseInt(request.getParameter("index"));
-            String nadpis = request.getParameter("nadpis");
-            String obsah = request.getParameter("obsah");
-
-            if (!nadpis.isEmpty() && !obsah.isEmpty()) {
-                zapisky.set(index, new Zapisek(nadpis, obsah));
-                presmeruj(request, response, "/");
-            } else {
-                presmeruj(request, response, "/upravit?index=" + index + "&upozorneni=True");
-            }
-        } else if (adresa.equals("/smazat")) {
-            int index = Integer.parseInt(request.getParameter("index"));
-            zapisky.remove(index);
-            presmeruj(request, response, "/");
-        } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            else {
+                presmeruj(request, response, "/?upozorneni=True"); 
+            }           
         }
+        else if(adresa.equals("/ulozitupravy")){
+            int id = Integer.parseInt(request.getParameter("id"));
+            String nadpis = request.getParameter("nadpis");
+            String obsah = request.getParameter("obsah");            
+            if(!nadpis.isEmpty() && !obsah.isEmpty()){
+                try {
+                    upravaZapisku.setZapisek(id, nadpis, obsah);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                presmeruj(request, response, "/");
+            }
+            else {
+                presmeruj(request, response, "/upravit?index=" + id + "&upozorneni=True");
+            }
+        }
+        else if(adresa.equals("/smazat")){
+            int id = Integer.parseInt(request.getParameter("id"));
+            try {
+                upravaZapisku.removeZapisek(id);
+            } catch (SQLException ex) {
+                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            presmeruj(request, response, "/"); 
+        }
+        else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }       
     }
 
     private void presmeruj(HttpServletRequest request, HttpServletResponse response, String url) {

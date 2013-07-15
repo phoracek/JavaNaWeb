@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Context antiJARLocking="true" path="/JavaNaWeb"/>
+<Context antiJARLocking="true" path="/JavaNaWeb">
+    <Resource auth="Container" driverClassName="com.mysql.jdbc.Driver"
+        maxActive="15" maxIdle="3"
+        name="jdbc/mysql" type="javax.sql.DataSource"
+        url="jdbc:mysql://localhost:3306/JNW?useEncoding=true&amp;characterEncoding=UTF-8"
+        username="[jmeno]" password="[heslo]" validationQuery="/* ping */ SELECT 1"/>
+</Context>

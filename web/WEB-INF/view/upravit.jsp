@@ -2,9 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib tagdir="/WEB-INF/tags" prefix="m" %>
 
-<m:Base titulek="Zápisky">
+<m:Base titulek="Zápisky">    
     <form action="<c:url value='/ulozitupravy' />" method="POST">
-        <input type="hidden" name="index" value="${param.index}" />
+        <input type="hidden" name="id" value="${zapisek.id}" />
         <label for="nadpis">Nadpis</label>
         <input type="text" name="nadpis" value="<c:out value='${zapisek.nadpis}' />" />
         <br>
