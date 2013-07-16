@@ -23,16 +23,17 @@ public class UpravaZapisku {
         return (ds.getConnection());
     }
 
-    public List<Zapisek> getZapisky() throws SQLException {
+    public List<Zapisek> getZapisky(String uzivatel) throws SQLException {
         Connection connection = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         List<Zapisek> zapisky = new ArrayList();
 
         try {
-            String query = "SELECT * FROM zapisky";
-            connection = getConnection();
-            stmt = connection.prepareStatement(query);
+            String query = "SELECT * FROM zapisky WHERE autor = ?";            
+            connection = getConnection();            
+            stmt = connection.prepareStatement(query);        
+            stmt.setString(1, uzivatel);
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -50,17 +51,18 @@ public class UpravaZapisku {
         return zapisky;
     }
 
-    public Zapisek getZapisek(int id) throws SQLException {
+    public Zapisek getZapisek(int id, String uzivatel) throws SQLException {
         Connection connection = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Zapisek zapisek = null;
 
         try {
-            String query = "SELECT * FROM zapisky WHERE id = ?";
-            connection = getConnection();
-            stmt = connection.prepareStatement(query);
+            String query = "SELECT * FROM zapisky WHERE id = ? AND autor = ?";            
+            connection = getConnection();            
+            stmt = connection.prepareStatement(query); 
             stmt.setInt(1, id);
+            stmt.setString(2, uzivatel);
             rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -78,17 +80,18 @@ public class UpravaZapisku {
         return zapisek;
     }
 
-    public void setZapisek(int id, String nadpis, String obsah) throws SQLException {
+    public void setZapisek(int id, String nadpis, String obsah, String uzivatel) throws SQLException {
         Connection connection = null;
         PreparedStatement stmt = null;
 
         try {
-            String query = "UPDATE zapisky SET nadpis = ?, obsah = ? WHERE id = ?";
-            connection = getConnection();
-            stmt = connection.prepareStatement(query);
+            String query = "UPDATE zapisky SET nadpis = ?, obsah = ? WHERE id = ? AND autor = ?";            
+            connection = getConnection();            
+            stmt = connection.prepareStatement(query); 
             stmt.setString(1, nadpis);
             stmt.setString(2, obsah);
             stmt.setInt(3, id);
+            stmt.setString(4, uzivatel);
             stmt.executeUpdate();
         } catch (NamingException ex) {
             Logger.getLogger(UpravaZapisku.class.getName()).log(Level.SEVERE, null, ex);
@@ -100,16 +103,17 @@ public class UpravaZapisku {
         }
     }
 
-    public void addZapisek(String nadpis, String obsah) throws SQLException {
+    public void addZapisek(String nadpis, String obsah, String uzivatel) throws SQLException {
         Connection connection = null;
         PreparedStatement stmt = null;
 
         try {
-            String query = "INSERT INTO zapisky (nadpis, obsah) VALUES (?, ?)";
-            connection = getConnection();
-            stmt = connection.prepareStatement(query);
+            String query = "INSERT INTO zapisky (nadpis, obsah, autor) VALUES (?, ?, ?)";            
+            connection = getConnection();            
+            stmt = connection.prepareStatement(query); 
             stmt.setString(1, nadpis);
             stmt.setString(2, obsah);
+            stmt.setString(3, uzivatel);
             stmt.executeUpdate();
         } catch (NamingException ex) {
             Logger.getLogger(UpravaZapisku.class.getName()).log(Level.SEVERE, null, ex);
@@ -121,15 +125,16 @@ public class UpravaZapisku {
         }
     }
 
-    public void removeZapisek(int id) throws SQLException {
+    public void removeZapisek(int id, String uzivatel) throws SQLException {
         Connection connection = null;
         PreparedStatement stmt = null;
 
         try {
-            String query = "DELETE FROM zapisky WHERE id = ?";
-            connection = getConnection();
-            stmt = connection.prepareStatement(query);
+            String query = "DELETE FROM zapisky WHERE id = ? AND autor = ?";            
+            connection = getConnection();            
+            stmt = connection.prepareStatement(query); 
             stmt.setInt(1, id);
+            stmt.setString(2, uzivatel);
             stmt.executeUpdate();
         } catch (NamingException ex) {
             Logger.getLogger(UpravaZapisku.class.getName()).log(Level.SEVERE, null, ex);

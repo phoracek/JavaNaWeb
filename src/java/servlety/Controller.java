@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import modely.Zapisek;
 
 @WebServlet(name = "Controller", urlPatterns = {"/zapisky", "/upravit", "/pridat", "/smazat", "/ulozitupravy"})
+@ServletSecurity(
+    @HttpConstraint(rolesAllowed = {"user"}))
 public class Controller extends HttpServlet {   
     
     @Override
@@ -21,10 +25,11 @@ public class Controller extends HttpServlet {
 
         String adresa = request.getServletPath();
         UpravaZapisku upravaZapisku = new UpravaZapisku();
+        String uzivatel = request.getRemoteUser();
         
         if(adresa.equals("/zapisky")) {
             try {
-                List<Zapisek> zapisky = upravaZapisku.getZapisky();
+                List<Zapisek> zapisky = upravaZapisku.getZapisky(uzivatel);
                 request.setAttribute("zapisky", zapisky);
                 request.getRequestDispatcher("/WEB-INF/view/zapisky.jsp").forward(request, response);    
             } catch (SQLException ex) {
@@ -34,7 +39,7 @@ public class Controller extends HttpServlet {
         else if(adresa.equals("/upravit")){
             try {
                 int id = Integer.parseInt(request.getParameter("id"));
-                Zapisek zapisek = upravaZapisku.getZapisek(id);
+                Zapisek zapisek = upravaZapisku.getZapisek(id, uzivatel);
                 request.setAttribute("zapisek", zapisek);
                 request.getRequestDispatcher("/WEB-INF/view/upravit.jsp").forward(request, response);
             } catch (SQLException ex) {
@@ -53,13 +58,14 @@ public class Controller extends HttpServlet {
         String adresa = request.getServletPath();
         request.setCharacterEncoding("UTF-8");
         UpravaZapisku upravaZapisku = new UpravaZapisku();
+        String uzivatel = request.getRemoteUser();
         
         if(adresa.equals("/pridat")) {
             String nadpis = request.getParameter("nadpis");
             String obsah = request.getParameter("obsah");            
             if(!nadpis.isEmpty() && !obsah.isEmpty()){
                 try {
-                    upravaZapisku.addZapisek(nadpis, obsah);
+                    upravaZapisku.addZapisek(nadpis, obsah, uzivatel);
                 } catch (SQLException ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -75,7 +81,7 @@ public class Controller extends HttpServlet {
             String obsah = request.getParameter("obsah");            
             if(!nadpis.isEmpty() && !obsah.isEmpty()){
                 try {
-                    upravaZapisku.setZapisek(id, nadpis, obsah);
+                    upravaZapisku.setZapisek(id, nadpis, obsah, uzivatel);
                 } catch (SQLException ex) {
                     Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -88,7 +94,7 @@ public class Controller extends HttpServlet {
         else if(adresa.equals("/smazat")){
             int id = Integer.parseInt(request.getParameter("id"));
             try {
-                upravaZapisku.removeZapisek(id);
+                upravaZapisku.removeZapisek(id, uzivatel);
             } catch (SQLException ex) {
                 Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
             }
