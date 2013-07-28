@@ -3,7 +3,7 @@
 <%@ taglib tagdir="/WEB-INF/tags" prefix="m" %>
 
 <m:Base titulek="Zápisky">   
-    <form action="<c:url value='/pridat' />" method="POST">
+    <form action="<c:url value='/pridat' />" method="POST" id="pridat-zapisek">
         <label for="nadpis">Nadpis</label>
         <input type="text" name="nadpis" />
         <br>
