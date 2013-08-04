@@ -20,6 +20,8 @@ import modely.Zapisek;
     @HttpConstraint(rolesAllowed = {"user"}))
 public class Controller extends HttpServlet {   
     
+    private final static Logger LOGGER = Logger.getLogger(Controller.class.getName());
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -33,7 +35,7 @@ public class Controller extends HttpServlet {
                 request.setAttribute("zapisky", zapisky);
                 request.getRequestDispatcher("/WEB-INF/view/zapisky.jsp").forward(request, response);    
             } catch (SQLException ex) {
-                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                LOGGER.log(Level.SEVERE, null, ex);
             }            
         }
         else if(adresa.equals("/upravit")){
@@ -43,7 +45,7 @@ public class Controller extends HttpServlet {
                 request.setAttribute("zapisek", zapisek);
                 request.getRequestDispatcher("/WEB-INF/view/upravit.jsp").forward(request, response);
             } catch (SQLException ex) {
-                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                LOGGER.log(Level.SEVERE, null, ex);
             }
         }
         else {
@@ -67,11 +69,12 @@ public class Controller extends HttpServlet {
                 try {
                     upravaZapisku.addZapisek(nadpis, obsah, uzivatel);
                 } catch (SQLException ex) {
-                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, null, ex);
                 }
                 presmeruj(request, response, "/"); 
             }
             else {
+                LOGGER.info("Proběhl pokus o přidání nevyplněného zápisku.");
                 presmeruj(request, response, "/?upozorneni=True"); 
             }           
         }
@@ -83,7 +86,7 @@ public class Controller extends HttpServlet {
                 try {
                     upravaZapisku.setZapisek(id, nadpis, obsah, uzivatel);
                 } catch (SQLException ex) {
-                    Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                    LOGGER.log(Level.SEVERE, null, ex);
                 }
                 presmeruj(request, response, "/");
             }
@@ -96,7 +99,7 @@ public class Controller extends HttpServlet {
             try {
                 upravaZapisku.removeZapisek(id, uzivatel);
             } catch (SQLException ex) {
-                Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+                LOGGER.log(Level.SEVERE, null, ex);
             }
             presmeruj(request, response, "/"); 
         }
